@@ -1,0 +1,26 @@
+---
+geth_user: geth
+
+install_type: archive
+archive_url: https://gethstore.blob.core.windows.net/builds/geth-linux-amd64-1.9.9-01744997.tar.gz
+install_dir: /opt/geth
+
+_config_template: config.toml.j2
+config_dir: /etc/geth
+
+geth_config:
+  Eth:
+    SyncMode: fast
+  Node:
+    DataDir: /var/geth
+
+_systemd_dir: /etc/systemd/system
+_launchd_template: com.O1.geth.plist.j2
+_launchd_dir: /Library/LaunchAgents
+
+_exe_dir: /usr/bin
+extra_run_args:
+  - '--rpc'
+custom_unit_properties: {}
+
+perform_uninstall: false

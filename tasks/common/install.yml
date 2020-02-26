@@ -1,0 +1,61 @@
+---
+- name: Ensure Geth group exists
+  become: true
+  group:
+    name: "{{ geth_user }}"
+    state: present
+    system: true
+  tags:
+    - install
+
+- name: Create Geth user
+  become: true
+  user:
+    comment: Geth client account
+    name: "{{ geth_user }}"
+    group: "{{ geth_user }}"
+    shell: "/sbin/nologin"
+    system: true
+    create_home: false
+  tags:
+    - install
+
+- name: Create installation directory
+  become: true
+  when: install_type == "archive"
+  file:
+    path: "{{ install_dir }}"
+    state: directory
+    owner: "{{ geth_user }}"
+    group: "{{ geth_user }}"
+  tags:
+    - install
+
+- name: Extract Geth archive
+  become: true
+  when: install_type == "archive"
+  unarchive:
+    src: "{{ archive_url }}"
+    dest: "{{ install_dir }}"
+    owner: "{{ geth_user }}"
+    group: "{{ geth_user }}"
+    mode: '0775'
+    remote_src: true
+    extra_opts:
+      - --strip-components
+      - '1'
+  tags:
+    - install
+    - archive
+
+- name: Create a symbolic link to installed binary
+  when: install_type == "archive" and ansible_os_family != "Darwin"
+  file:
+    src: "{{ install_dir }}/geth"
+    dest: "{{ _exe_dir }}/geth"
+    owner: "{{ geth_user }}"
+    group: "{{ geth_user }}"
+    state: link
+  tags:
+    - install
+    - archive
